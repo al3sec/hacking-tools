@@ -1,7 +1,8 @@
 import httpx
 import json
-import img2pdf
+import os
 from PIL import Image
+import pytesseract
 from selenium import webdriver
 from time import sleep
 from PyPDF2 import PdfReader 
@@ -18,7 +19,11 @@ def check_local_cert(fileName):
   
     # extracting text from page 
     text = page.extract_text() 
+
     ltest = text.split("\n") 
+
+    #for i,a in enumerate(ltest):
+    #    print('i: '+ str(i) + ',' + a)
 
     codigoVerificacion = ltest[5]
     folio = ltest[6]
@@ -53,65 +58,60 @@ def validate_cert(codigoVerificacion, folio, client):
         url= baseUrl + 'verCopiaPdf.srcei?fileName=' + fileName
         print(url)
 
-        try:
-            save_page(url)
+        fileName = 'file.png'
 
-        except:
-            print("there was an exception trying to download criminal record certificate")	
+        #try:
+        check_pdf(url, fileName)
 
-        try:
-            png_to_pdf()
+        #except:
+        #    print("there was an exception trying to proccess criminal record certificate")	
 
-        except:
-            print("there was an exception trying to convert certificate from png to pdf")	
-      
 
-def save_page(url):
+def check_pdf(url, fileName):
     driver = webdriver.Firefox()
     driver.get(url)
-    sleep(1)
+    sleep(5)
 
-    driver.get_screenshot_as_file("file.png")
+    driver.get_screenshot_as_file(fileName)
     driver.quit()
 
+    image = Image.open(fileName)
+    text = pytesseract.image_to_string(image)
+    # print(text)
+    
+    os.remove(fileName)
 
-def png_to_pdf():
-    # opening image
-    image = Image.open('file.png')
- 
-    # converting into chunks using img2pdf
-    pdf_bytes = img2pdf.convert(image.filename)
- 
-    # opening or creating pdf file
-    file = open('file.pdf', "wb")
- 
-    # writing pdf files with chunks
-    file.write(pdf_bytes)
- 
-    # closing image file
-    image.close()
- 
-    # closing pdf file
-    file.close()
- 
-    # output
-    print("Successfully made pdf file")
+    ltest = text.split("\n") 
+
+    antecedentes = False
+    anotaciones = False
+
+    for i,a in enumerate(ltest):
+        if 'SIN ANTECEDEN' in a:
+            antecedentes = True
+        elif 'SIN ANOTACIONES':
+            anotaciones = True
+
+
+    if antecedentes and anotaciones:
+        print('[+] PASSED !')
+        return True
+    else:
+        print('[!] Failed')
+        return False
+
+
 
 
 if __name__=="__main__":
-    files = ['ANT_FE_xxxxx_yyyyyyyy.pdf', 'ANT_FE_zzzzz_wwwwwwww.pdf']
+    files = ['ANT_FE_XXXX.pdf', 'ANT_YYYY.pdf']
 
-    (result, codigoVerificacion, folio) = check_local_cert(files[0])
-    print(result)
-    print(codigoVerificacion)
-    print(folio)
-
-    check_local_cert('file.pdf')    
+    (result, codigoVerificacion, folio) = check_local_cert(files[1])
    
     # proxies = { "http://": "http://localhost:8080", "https://": "http://localhost:8080"}
 
-    # with httpx.Client(verify=False) as client:
-    #    validate_cert(codigoVerificacion,folio, client)
+    with httpx.Client(verify=False) as client:
+        validate_cert(codigoVerificacion,folio, client)
 
     #for f in files:
     #   check_local_cert(f)
