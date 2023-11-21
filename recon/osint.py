@@ -22,9 +22,6 @@ def check_local_cert(fileName):
 
     ltest = text.split("\n") 
 
-    #for i,a in enumerate(ltest):
-    #    print('i: '+ str(i) + ',' + a)
-
     codigoVerificacion = ltest[5]
     folio = ltest[6]
     antecedentes = ltest[14]
@@ -41,18 +38,18 @@ def check_local_cert(fileName):
     
 
 def validate_cert(codigoVerificacion, folio, client):
-        url= baseUrl + '/verificacion/verificarCertificado.srcei'
+    url= baseUrl + '/verificacion/verificarCertificado.srcei'
 
-        try:
-            data = { 'ver_nameInputTextFolio': folio, 'ver_nameInputTextCodVerificador': codigoVerificacion }
-            headers = { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'Host': 'www.registrocivil.cl', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)' }
-            result = client.post(url, data=data, headers=headers)
-            json_object = json.loads(result.text)
-            fileName = json_object['fileName']
-            print(fileName)
+    try:
+        data = { 'ver_nameInputTextFolio': folio, 'ver_nameInputTextCodVerificador': codigoVerificacion }
+        headers = { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'Host': 'www.registrocivil.cl', 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)' }
+        result = client.post(url, data=data, headers=headers)
+        json_object = json.loads(result.text)
+        fileName = json_object['fileName']
+        print(fileName)
 
-        except:
-            print("there was an exception trying to validate criminal record certificate")	
+    except:
+        print("there was an exception trying to validate criminal record certificate")	
 
         #downloading file
         url= baseUrl + 'verCopiaPdf.srcei?fileName=' + fileName
@@ -60,11 +57,11 @@ def validate_cert(codigoVerificacion, folio, client):
 
         fileName = 'file.png'
 
-        #try:
-        check_pdf(url, fileName)
+        try:
+            check_pdf(url, fileName)
 
-        #except:
-        #    print("there was an exception trying to proccess criminal record certificate")	
+        except:
+            print("there was an exception trying to proccess criminal record certificate")	
 
 
 def check_pdf(url, fileName):
