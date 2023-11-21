@@ -39,6 +39,7 @@ def check_local_cert(fileName):
 
 def validate_cert(codigoVerificacion, folio, client):
     url= baseUrl + '/verificacion/verificarCertificado.srcei'
+    fileName = ''
 
     try:
         data = { 'ver_nameInputTextFolio': folio, 'ver_nameInputTextCodVerificador': codigoVerificacion }
@@ -51,32 +52,41 @@ def validate_cert(codigoVerificacion, folio, client):
     except:
         print("there was an exception trying to validate criminal record certificate")	
 
-        #downloading file
-        url= baseUrl + 'verCopiaPdf.srcei?fileName=' + fileName
-        print(url)
+    #downloading file
+    url= baseUrl + 'verCopiaPdf.srcei?fileName=' + fileName
+    print(url)
 
-        fileName = 'file.png'
+    fileName = 'file.png'
 
-        try:
-            check_pdf(url, fileName)
+    try:
+        check_pdf(url, fileName)
 
-        except:
-            print("there was an exception trying to proccess criminal record certificate")	
+    except:
+        print("there was an exception trying to proccess criminal record certificate")	
 
 
 def check_pdf(url, fileName):
-    driver = webdriver.Firefox()
-    driver.get(url)
-    sleep(5)
+    # options = webdriver.FirefoxOptions()
+    # options.add_argument('--headless')
 
-    driver.get_screenshot_as_file(fileName)
-    driver.quit()
+    # until we've got a good screenshot
+    while True:
+        driver = webdriver.Firefox()
+        driver.get(url)
+        sleep(3)
 
-    image = Image.open(fileName)
-    text = pytesseract.image_to_string(image)
-    # print(text)
-    
-    os.remove(fileName)
+        driver.get_screenshot_as_file(fileName)
+        driver.quit()
+
+        image = Image.open(fileName)
+        text = pytesseract.image_to_string(image)
+        # print(text)
+
+        if '\n' in text:
+            break
+
+        os.remove(fileName)
+
 
     ltest = text.split("\n") 
 
@@ -101,14 +111,12 @@ def check_pdf(url, fileName):
 
 
 if __name__=="__main__":
-    files = ['ANT_FE_XXXX.pdf', 'ANT_YYYY.pdf']
+    files = ['ANT_XXXX.pdf', 'ANT_YYYY.pdf']
 
-    (result, codigoVerificacion, folio) = check_local_cert(files[1])
-   
     # proxies = { "http://": "http://localhost:8080", "https://": "http://localhost:8080"}
+    for f in files:
+        (result, codigoVerificacion, folio) = check_local_cert(f)
+   
+        with httpx.Client(verify=False) as client:
+            validate_cert(codigoVerificacion,folio, client)
 
-    with httpx.Client(verify=False) as client:
-        validate_cert(codigoVerificacion,folio, client)
-
-    #for f in files:
-    #   check_local_cert(f)
