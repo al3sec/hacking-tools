@@ -99,7 +99,7 @@ def png_to_pdf():
 
 
 if __name__=="__main__":
-    files = ['ANT_FE_500537876558_19112325.pdf', 'ANT_FE_500537876558_19112325.pdf']
+    files = ['ANT_FE_xxxxx_yyyyyyyy.pdf', 'ANT_FE_zzzzz_wwwwwwww.pdf']
 
     (result, codigoVerificacion, folio) = check_local_cert(files[0])
     print(result)
