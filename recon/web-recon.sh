@@ -25,7 +25,7 @@ echo "using dnsgen ..."
 cat "$domain-subdomains.txt" | dnsgen - | tee "$domain-dnsgen-subdomains.txt"
 
 # Using a larger wordlist
-dnsgen --wordlist /opt/useful/uniq-subdomain-permutation.txt subdomains.txt >> "$domain-dnsgen-subdomains.txt"
+dnsgen --wordlist /opt/useful/uniq-subdomain-permutation.txt "$domain-subdomains.txt" >> "$domain-dnsgen-subdomains.txt"
 cat "$domain-dnsgen-subdomains.txt" >> "$domain-subdomains.txt"
 
 # Again, just unique subdomains
@@ -72,4 +72,3 @@ sort "$domain-online-subdomains.txt" | uniq > "$domain-final-uniq-online-subdoma
 
 # If you already have a list of domains and what to see if there are new ones, anew TomNomNom also plays nicely
 # cat new-output.txt | anew old-output.txt | httprobe
-
